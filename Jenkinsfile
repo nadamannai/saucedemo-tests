@@ -9,8 +9,8 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                echo 'Installing dependencies...'
-                sh '''
+                echo 'Installing dependencies on Windows...'
+                bat '''
                     python -m pip install --upgrade pip
                     pip install -r requirements.txt
                     playwright install
@@ -24,21 +24,21 @@ pipeline {
                 stage('Robot Framework Test') {
                     steps {
                         echo 'Running Robot Framework test'
-                        sh 'robot robot-tests/login.robot'
+                        bat 'robot robot-tests\\login.robot'
                     }
                 }
 
                 stage('Selenium Tests') {
                     steps {
                         echo 'Running Selenium tests'
-                        sh 'pytest selenium-tests/'
+                        bat 'pytest selenium-tests'
                     }
                 }
 
                 stage('Playwright Tests') {
                     steps {
                         echo 'Running Playwright tests'
-                        sh 'pytest playwright-tests/'
+                        bat 'pytest playwright-tests'
                     }
                 }
             }
@@ -48,7 +48,7 @@ pipeline {
     post {
         always {
             echo 'Archiving test results'
-            archiveArtifacts artifacts: '**/output.xml, **/log.html, **/report.html', fingerprint: true
+            archiveArtifacts artifacts: '**/*.xml, **/*.html', fingerprint: true
         }
 
         success {
