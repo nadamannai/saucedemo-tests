@@ -24,21 +24,21 @@ pipeline {
                 stage('Robot Framework Test') {
                     steps {
                         echo 'Running Robot Framework test'
-                        sh 'robot robot_tests/login.robot'
+                        sh 'robot robot-tests/login.robot'
                     }
                 }
 
                 stage('Selenium Tests') {
                     steps {
                         echo 'Running Selenium tests'
-                        sh 'pytest selenium_tests/'
+                        sh 'pytest selenium-tests/'
                     }
                 }
 
                 stage('Playwright Tests') {
                     steps {
                         echo 'Running Playwright tests'
-                        sh 'pytest playwright_tests/'
+                        sh 'pytest playwright-tests/'
                     }
                 }
             }
