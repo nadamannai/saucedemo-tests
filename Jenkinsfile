@@ -6,17 +6,17 @@ pipeline {
     }
 
     stages {
-
         stage('Install Dependencies') {
             steps {
-                echo 'Installing dependencies on Windows...'
-                bat '''
-                    python -m pip install --upgrade pip
+                echo "Installing dependencies on Windows..."
+                bat """
+                    python -m pip install --upgrade pip setuptools wheel
                     python -m pip install -r requirements.txt
                     python -m playwright install
-                '''
+                """
             }
         }
+
 
         stage('Run Tests In Parallel') {
             parallel {
