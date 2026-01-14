@@ -12,8 +12,8 @@ pipeline {
                 echo 'Installing dependencies on Windows...'
                 bat '''
                     python -m pip install --upgrade pip
-                    pip install -r requirements.txt
-                    playwright install
+                    python -m pip install -r requirements.txt
+                    python -m playwright install
                 '''
             }
         }
