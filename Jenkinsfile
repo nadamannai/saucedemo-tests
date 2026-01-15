@@ -6,40 +6,87 @@ pipeline {
     }
 
     stages {
-        stage('Install Dependencies') {
+
+        stage('Checkout') {
             steps {
-                echo "Installing dependencies on Windows..."
-                bat """
-                    python -m pip install --upgrade pip setuptools wheel
-                    python -m pip install -r requirements.txt
-                    python -m playwright install
-                """
+                checkout scm
             }
         }
 
-
-        stage('Run Tests In Parallel') {
-            parallel {
-
-                stage('Robot Framework Test') {
-                    steps {
-                        echo 'Running Robot Framework test'
-                        bat 'robot robot-tests\\login.robot'
-                    }
+        stage('Install Robot Framework Dependencies') {
+            steps {
+                dir('robot') {
+                    bat '''
+                    python -m pip install --upgrade pip
+                    pip install -r requirements-robot.txt
+                    '''
                 }
+            }
+        }
 
-                stage('Selenium Tests') {
-                    steps {
-                        echo 'Running Selenium tests'
-                        bat 'pytest selenium-tests'
-                    }
+        stage('Run Robot Framework Tests') {
+            steps {
+                dir('robot') {
+                    bat '''
+                    robot --outputdir results tests
+                    '''
                 }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'robot/results/**', fingerprint: true
+                }
+            }
+        }
 
-                stage('Playwright Tests') {
-                    steps {
-                        echo 'Running Playwright tests'
-                        bat 'pytest playwright-tests'
-                    }
+        stage('Install Selenium Python Dependencies') {
+            when {
+                expression { fileExists('selenium/requirements-selenium.txt') }
+            }
+            steps {
+                dir('selenium') {
+                    bat '''
+                    pip install -r requirements-selenium.txt
+                    '''
+                }
+            }
+        }
+
+        stage('Run Selenium Python Tests') {
+            when {
+                expression { fileExists('selenium/tests') }
+            }
+            steps {
+                dir('selenium') {
+                    bat '''
+                    python -m pytest tests
+                    '''
+                }
+            }
+        }
+
+        stage('Install Playwright Dependencies') {
+            steps {
+                dir('playwright') {
+                    bat '''
+                    npm ci
+                    npx playwright install
+                    '''
+                }
+            }
+        }
+
+        stage('Run Playwright Tests') {
+            steps {
+                dir('playwright') {
+                    bat '''
+                    npm test
+                    '''
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'playwright/playwright-report/**', fingerprint: true
                 }
             }
         }
@@ -47,16 +94,13 @@ pipeline {
 
     post {
         always {
-            echo 'Archiving test results'
-            archiveArtifacts artifacts: '**/*.xml, **/*.html', fingerprint: true
+            echo 'Pipeline finished'
         }
-
-        success {
-            echo 'All parallel tests passed ✅'
-        }
-
         failure {
-            echo 'Some tests failed ❌'
+            echo 'Pipeline failed ❌'
+        }
+        success {
+            echo 'Pipeline succeeded ✅'
         }
     }
 }
