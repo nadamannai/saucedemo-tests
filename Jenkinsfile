@@ -18,7 +18,7 @@ pipeline {
                 dir('robot') {
                     bat '''
                     python -m pip install --upgrade pip
-                    pip install -r requirements-robot.txt
+                    python -m pip install -r requirements-robot.txt
                     '''
                 }
             }
@@ -28,7 +28,7 @@ pipeline {
             steps {
                 dir('robot') {
                     bat '''
-                    robot --outputdir results tests
+                    python -m robot --outputdir results tests
                     '''
                 }
             }
@@ -46,7 +46,7 @@ pipeline {
             steps {
                 dir('selenium') {
                     bat '''
-                    pip install -r requirements-selenium.txt
+                    python -m pip install -r requirements-selenium.txt
                     '''
                 }
             }
